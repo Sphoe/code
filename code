@@ -1,3 +1,6 @@
 Get-AzKeyVault | % { $vaultName = $_.VaultName; Get-AzKeyVault -VaultName $vaultName | Select-Object -ExpandProperty AccessPolicies | Select-Object @{Name='VaultName'; Expression={$vaultName}}, @{Name='ObjectId'; Expression={$_.ObjectId}}, @{Name='Keys'; Expression={$_.PermissionsToKeys.Count}}, @{Name='Secrets'; Expression={$_.PermissionsToSecrets.Count}}, @{Name='Certificates'; Expression={$_.PermissionsToCertificates.Count}}, @{Name='DisplayName'; Expression={if ($_.DisplayName -eq "") {"UNKNOWN"} else {$_.DisplayName}}} } | Sort-Object -Property Secrets | Format-Table -AutoSize
 
 Get-AzContainerRegistry | ForEach-Object { $ipRanges = ($_ | Get-AzResource -ExpandProperties).properties.networkRuleSet.ipRules; [PSCustomObject]@{Name = $_.Name; PublicNetworkAccess = $_.PublicNetworkAccess; SelectedIPRanges = $ipRanges } } | Select-Object Name, PublicNetworkAccess, SelectedIPRanges
+
+
+Get-AzWebApp -ResourceGroupName <ResourceGroupName> | Select-Object Name, @{Name='Http20Enabled';Expression={$_.SiteConfig.Http20Enabled}}
