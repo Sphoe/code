@@ -43,3 +43,49 @@ Check DaemonSets:
 bash
 
 kubectl get daemonset --all-namespaces -o=jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metada
+
+
+
+Step 2: Check Pods and Workloads (e.g., Deployments, DaemonSets)
+
+Similarly, you can check all the pods across all namespaces to verify the pod-level settings:
+
+bash
+
+kubectl get pods --all-namespaces -o json | jq '.items[] | select(.spec.automountServiceAccountToken != false) | .metadata.name'
+
+This will give you the names of any pods where automountServiceAccountToken is not disabled.
+Manual Inspection (without grep or jq)
+
+If you're unable to use tools like jq, you can directly inspect individual service accounts, pods, and workloads with kubectl and review the configuration manually:
+Service Account Inspection
+
+To inspect a specific service account:
+
+bash
+
+kubectl get serviceaccount <service-account-name> -n <namespace> -o yaml
+
+Look for the automountServiceAccountToken field in the output.
+Pod or Workload Inspection
+
+To inspect a specific pod, deployment, or other workload:
+
+bash
+
+kubectl get pod <pod-name> -n <namespace> -o yaml
+
+For a deployment:
+
+bash
+
+kubectl get deployment <deployment-name> -n <namespace> -o yaml
+
+Check if the pod or workload has the automountServiceAccountToken: false field set under the spec section.
+Automated Approach with Security Tools
+
+Using a Kubernetes security tool like Kubescape or Kube-Bench would make this process easier and automated without the need for manual kubectl checks:
+
+bash
+
+kubescape scan framework nsa --exclude-namespaces kube-system
