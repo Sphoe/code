@@ -4,3 +4,12 @@ Get-AzContainerRegistry | ForEach-Object { $ipRanges = ($_ | Get-AzResource -Exp
 
 
 Get-AzWebApp -ResourceGroupName <ResourceGroupName> | Select-Object Name, @{Name='Http20Enabled';Expression={$_.SiteConfig.Http20Enabled}}
+
+kubectl get pods --all-namespaces -o json | jq '.items[] | select(
+  (.spec.securityContext.runAsUser == null or .spec.securityContext.runAsUser < 1000) and
+  (.spec.securityContext.runAsNonRoot == null or .spec.securityContext.runAsNonRoot == false) and
+  (.spec.securityContext.runAsGroup == null or .spec.securityContext.runAsGroup < 1000) and
+  (.spec.containers[].securityContext.runAsUser == null or .spec.containers[].securityContext.runAsUser < 1000) and
+  (.spec.containers[].securityContext.runAsNonRoot == null or .spec.containers[].securityContext.runAsNonRoot == false) and
+  (.spec.containers[].securityContext.runAsGroup == null or .spec.containers[].securityContext.runAsGroup < 1000)
+) | {namespace: .metadata.namespace, pod: .metadata.name}'
